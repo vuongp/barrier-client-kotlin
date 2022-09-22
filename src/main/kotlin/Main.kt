@@ -1,11 +1,14 @@
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
+import io.ktor.util.*
+import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-suspend fun main(args: Array<String>) = runBlocking {
+fun main(): Unit = runBlocking {
     val selectorManager = SelectorManager(Dispatchers.IO)
     val socket = aSocket(selectorManager).tcp().connect("192.168.178.248", 24800)
 
@@ -13,33 +16,38 @@ suspend fun main(args: Array<String>) = runBlocking {
     val receiveChannel = socket.openReadChannel()
 
     sendChannel.writePacket(createClientHello("ANTON"))
-    receiveChannel.readAvailable { byteBuffer ->
-        print("server: " + byteBuffer.int + ",")
-        repeat(7) {
-            print(byteBuffer.get().toInt().toChar())
-        }
-        print(",${byteBuffer.short},${byteBuffer.short}")
-        println()
-    }
-    delay(1000)
-    sendChannel.writePacket(createClientData())
-    while (!socket.isClosed) {
-        delay(10)
-        receiveChannel.awaitContent()
-        receiveChannel.readAvailable { byteBuffer ->
-            val numberOfBytes = byteBuffer.int
-            print("${byteBuffer.limit()} server: $numberOfBytes,")
-            repeat(4) {
-                print(byteBuffer.get().toInt().toChar())
+    launch {
+        while (!socket.isClosed) {
+            val readPacket = receiveChannel.readPacket()
+            println("server: $readPacket")
+            if (readPacket == QueryInfoMessage) {
+                println("ClientData sent")
+                sendChannel.writePacket(createClientData())
+            } else if (readPacket == KeepAliveMessage) {
+                println("Keep alive sent")
+                sendChannel.writePacket(createKeepAlivePacket())
             }
-            repeat(numberOfBytes - 4) {
-                print("[${byteBuffer.get()}]")
-            }
-            println()
         }
-        receiveChannel.awaitContent()
     }
 }
+
+@OptIn(InternalAPI::class)
+private suspend fun ByteReadChannel.readPacket(): Message? {
+    val nrOfBytes = readInt()
+    val data = ByteArray(nrOfBytes)
+    readFully(data)
+    return when(val msgCode = String(data, 0, 4)) {
+        "Barr" -> {
+            ServerHelloMessage(data.readShort(7), data.readShort(9))
+        }
+        "QINF" -> QueryInfoMessage
+        "CALV" -> KeepAliveMessage
+        else -> {
+            UnknownMessage(msgCode)
+        }
+    }
+}
+
 
 private fun createClientHello(name: String): ByteReadPacket {
     return buildPacket {
@@ -52,6 +60,12 @@ private fun createClientHello(name: String): ByteReadPacket {
     }
 }
 
+private fun createKeepAlivePacket(): ByteReadPacket {
+    return buildPacket {
+        writeInt(4)
+        writeText("CALV")
+    }
+}
 private fun createNoOperationPacket(): ByteReadPacket {
     return buildPacket {
         writeInt(4)
@@ -79,20 +93,3 @@ private fun createClientData(): ByteReadPacket {
         writeShort(0)
     }
 }
-
-// client data:  secondary -> primary
-// $1 = coordinate of leftmost pixel on secondary screen,
-// $2 = coordinate of topmost pixel on secondary screen,
-// $3 = width of secondary screen in pixels,
-// $4 = height of secondary screen in pixels,
-// $5 = size of warp zone, (obsolete)
-// $6, $7 = the x,y position of the mouse on the secondary screen.
-//
-// the secondary screen must send this message in response to the
-// kMsgQInfo message.  it must also send this message when the
-// screen's resolution changes.  in this case, the secondary screen
-// should ignore any kMsgDMouseMove messages until it receives a
-// kMsgCInfoAck in order to prevent attempts to move the mouse off
-// the new screen area.
-//extern const char*        kMsgDInfo;
-//DINF%2i%2i%2i%2i%2i%2i%2i
