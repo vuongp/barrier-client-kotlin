@@ -19,10 +19,28 @@ class MessageByteReader {
             "Barr" -> Message.ServerHello(data.readShort(7), data.readShort(9))
             "QINF" -> Message.QueryInfo
             "CALV" -> Message.KeepAlive
+            "DMMV" -> Message.MouseMove(data.readShort(4), data.readShort(6))
+            "COUT" -> Message.ExitScreen
+            "CIAK" -> Message.InfoAcknowledge
+            "CROP" -> Message.ResetOptions
+            "CINN" -> Message.EnterScreen(
+                data.readShort(4),
+                data.readShort(6),
+                0,
+                data.readShort(12)
+            )
             else -> {
                 Message.Unknown(msgCode)
             }
         }
+    }
+
+    private fun ByteArray.readInt(offset: Int): Int {
+        var result = 0
+        repeat(4) {
+            result = result or (this[it + offset].toInt() shl 8 * it)
+        }
+        return result
     }
 
     /**

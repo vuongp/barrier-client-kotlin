@@ -11,9 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 fun main(): Unit = runBlocking {
-    BarrierClient("ANTON")
-        .connect("localhost", 24800)
-        .addEventListener {
-
-        }
+    BarrierClient("ANTON").also { it ->
+        it.addEventListener { println(it) }
+        it.connect("localhost", 24800)
+    }
 }

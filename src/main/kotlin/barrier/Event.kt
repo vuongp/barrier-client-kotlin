@@ -1,5 +1,5 @@
 package barrier
 
 sealed class Event {
-    class MouseMove(x: Int, y: Int): Event()
+    data class MouseMove(val x: Int, val y: Int): Event()
 }

@@ -17,12 +17,11 @@ class BarrierClient(
     private val eventListeners = mutableListOf<(Event) -> Unit>()
     private val messageByteReader = MessageByteReader()
 
-    fun addEventListener(eventListener: (Event) -> Unit): BarrierClient {
+    fun addEventListener(eventListener: (Event) -> Unit) {
         eventListeners.add(eventListener)
-        return this
     }
 
-    suspend fun connect(hostname: String, port: Int = 24800): BarrierClient {
+    suspend fun connect(hostname: String, port: Int = 24800) {
         val selectorManager = SelectorManager(Dispatchers.IO)
         val socket = aSocket(selectorManager)
             .tcp()
@@ -40,9 +39,12 @@ class BarrierClient(
             val readPacket = messageByteReader.readPacket(receiveChannel)
             messageHandler.handle(readPacket)
 
-            println(readPacket)
+            if (readPacket is Message.MouseMove) {
+                eventListeners.forEach {
+                    it.invoke(Event.MouseMove(readPacket.x.toInt(), readPacket.y.toInt()))
+                }
+            }
         }
-        return this
     }
 
 }

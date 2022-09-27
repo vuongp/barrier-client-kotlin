@@ -17,6 +17,8 @@ class MessagePacketCreator {
             is QueryInfo -> TODO()
             is ServerHello -> TODO()
             is Unknown -> TODO()
+            is MouseMove -> TODO()
+            else -> TODO()
         }
     }
 

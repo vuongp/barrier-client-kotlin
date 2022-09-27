@@ -44,12 +44,19 @@ sealed class Message {
     /**
      * sent by server
      * format "CINN%2i%2i%4i%2i"
-     * entering screen at screen position $1 = x, $2 = y. x,y are absolute screen coordinates.
+     * entering screen at screen position
+     * $1 = x
+     * $2 = y. x,y are absolute screen coordinates.
      * $3 = sequence number, which is used to order messages between screens. the secondary screen must return this number with some messages.
      * $4 = modifier key mask. this will have bits set for each toggle modifier key that is activated on entry to the screen.
      *      the secondary screen should adjust its toggle modifiers to reflect that state.
      */
-    object EnterScreen : Message()
+    data class EnterScreen(
+        val x: Short,
+        val y: Short,
+        val sequenceNumber: Int,
+        val modifierKeyMask: Short
+    ) : Message()
 
     /**
      * sent by server
@@ -58,6 +65,19 @@ sealed class Message {
      * the secondary screen should send clipboard data in response to this message for those clipboards that it has grabbed (i.e. has sent a kMsgCClipboard for and has not received a kMsgCClipboard for with a greater sequence number) and that were grabbed or have changed since the last leave.
      */
     object ExitScreen : Message()
+
+    /**
+     * Client should reset all of its options to their defaults.
+     */
+    object ResetOptions : Message()
+
+    /**
+     * sent by server
+     * format "CIAK"
+     * sent by server in response to a secondary screen's info.
+     * this is sent for every screen info, whether or not the server had sent a Query for info.
+     */
+    object InfoAcknowledge : Message()
 
     /**
      * sent by both server and client
@@ -69,6 +89,20 @@ sealed class Message {
      *  the appropriate interval is defined by an option (Default 3 seconds).
      */
     object KeepAlive : Message()
+    //endregion
+
+    //region Data codes
+    /**
+     * sent by server
+     * format "DMMV%2i%2i"
+     * mouse move x,y are absolute screen coordinates.
+     * $1 = x
+     * $2 = y
+     */
+    data class MouseMove(
+        val x: Short,
+        val y: Short
+    ) : Message()
     //endregion
 
     /**
