@@ -20,6 +20,8 @@ class MessageByteReader {
             "QINF" -> Message.QueryInfo
             "CALV" -> Message.KeepAlive
             "DMMV" -> Message.MouseMove(data.readShort(4), data.readShort(6))
+            "DMUP" -> Message.MouseUp(data[4])
+            "DMDN" -> Message.MouseDown(data[4])
             "COUT" -> Message.ExitScreen
             "CIAK" -> Message.InfoAcknowledge
             "CROP" -> Message.ResetOptions

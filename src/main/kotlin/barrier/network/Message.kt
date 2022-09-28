@@ -103,6 +103,20 @@ sealed class Message {
         val x: Short,
         val y: Short
     ) : Message()
+
+    /**
+     * sent by server
+     * mouse button pressed
+     * $1 = ButtonID (1 is left mouse, 3 is right mouse click)
+     */
+    data class MouseDown(val buttonId: Byte) : Message()
+
+    /**
+     * sent by server
+     * mouse button released
+     * $1 = ButtonID (1 is left mouse, 3 is right mouse click)
+     */
+    data class MouseUp(val buttonId: Byte) : Message()
     //endregion
 
     /**

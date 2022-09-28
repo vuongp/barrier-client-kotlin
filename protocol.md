@@ -86,6 +86,18 @@ Sent by the server periodically to verify that connections are still up and runn
 
 # Data codes
 
+## Mouse down (Sent by server)
+`DMDN%1i`
+
+mouse button pressed
+* $1 = ButtonID
+
+## Mouse up (Sent by server)
+`DMUP%1i`
+
+mouse button released
+* $1 = ButtonID
+
 ## Mouse move (Sent by server)
 `DMMV%2i%2i`
 
@@ -143,18 +155,18 @@ name provided when connecting is not in primary's screen configuration map.
 Server should disconnect after sending this message
 
 ## Todo
+
 Too lazy to do all of them now to be continued
-const char*                kMsgDKeyDown        = "DKDN%2i%2i%2i";
-const char*                kMsgDKeyDown1_0        = "DKDN%2i%2i";
-const char*                kMsgDKeyRepeat        = "DKRP%2i%2i%2i%2i";
-const char*                kMsgDKeyRepeat1_0    = "DKRP%2i%2i%2i";
-const char*                kMsgDKeyUp            = "DKUP%2i%2i%2i";
-const char*                kMsgDKeyUp1_0        = "DKUP%2i%2i";
-const char*                kMsgDMouseDown        = "DMDN%1i";
-const char*                kMsgDMouseUp        = "DMUP%1i";
-const char*                kMsgDMouseRelMove    = "DMRM%2i%2i";
-const char*                kMsgDMouseWheel        = "DMWM%2i%2i";
-const char*                kMsgDMouseWheel1_0    = "DMWM%2i";
-const char*                kMsgDInfo            = "DINF%2i%2i%2i%2i%2i%2i%2i;
-const char*                kMsgDFileTransfer    = "DFTR%1i%s";
-const char*                kMsgDDragInfo        = "DDRG%2i%s";
+
+* kMsgDKeyDown        = "DKDN%2i%2i%2i";
+* kMsgDKeyDown1_0        = "DKDN%2i%2i";
+* kMsgDKeyRepeat        = "DKRP%2i%2i%2i%2i";
+* kMsgDKeyRepeat1_0    = "DKRP%2i%2i%2i";
+* kMsgDKeyUp            = "DKUP%2i%2i%2i";
+* kMsgDKeyUp1_0        = "DKUP%2i%2i";
+* kMsgDMouseRelMove    = "DMRM%2i%2i";
+* kMsgDMouseWheel        = "DMWM%2i%2i";
+* kMsgDMouseWheel1_0    = "DMWM%2i";
+* kMsgDInfo            = "DINF%2i%2i%2i%2i%2i%2i%2i;
+* kMsgDFileTransfer    = "DFTR%1i%s";
+* kMsgDDragInfo        = "DDRG%2i%s";
